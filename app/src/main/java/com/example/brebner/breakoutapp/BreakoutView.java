@@ -1,6 +1,7 @@
 package com.example.brebner.breakoutapp;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.graphics.Canvas;
@@ -34,8 +35,11 @@ public class BreakoutView extends SurfaceView implements Runnable {
     public final int HUD_COLOUR = Color.argb(255,  255, 200, 200);
     public final boolean NOISY = false;
 
-    public final long LOSECOUNTTIME = 10;  // how many seconds to show the you lost message
-    public final long WONCOUNTIME = 10;  // how many seconds to show the you won message
+    public final long LOSECOUNTTIME = 3;  // how many seconds to show the you lost message
+    public final long WONCOUNTIME = 3;  // how many seconds to show the you won message
+
+    public static final String EXTRA_MESSAGE = "com.example.brebner.breakoutapp.MESSAGE";
+    public static final String EXTRA_SCORE = "com.example.brebner.breakoutapp.SCORE";
 
     private long loseCount = 0;
     private long wonCount = 0;
@@ -86,6 +90,7 @@ public class BreakoutView extends SurfaceView implements Runnable {
 
     // The score
     int score = 0;
+    int prevscore = 0;
 
     // Lives
     int lives = NLIVES;
@@ -246,6 +251,7 @@ public class BreakoutView extends SurfaceView implements Runnable {
             if(lives == 0){
                 paused = true;
                 loseCount = LOSECOUNTTIME *  fps;
+                prevscore = score;
                 createBricksAndRestart();
             }
         }
@@ -277,6 +283,7 @@ public class BreakoutView extends SurfaceView implements Runnable {
         if(score == numBricks * 10){
             paused = true;
             wonCount = WONCOUNTIME *  fps;
+            prevscore = score;
             createBricksAndRestart();
         }
         ball.update(fps);
@@ -294,12 +301,26 @@ public class BreakoutView extends SurfaceView implements Runnable {
                     paint.setTextSize(60);
                     canvas.drawText("YOU LOST", this.screenX / 2, this.screenY / 2, paint);
                     loseCount--;
+                    if (loseCount <= 0) {
+                        Intent scoreintent = new Intent(getContext(), ScoreActivity.class);
+                        String message = "You Lost";
+                        scoreintent.putExtra(EXTRA_MESSAGE, message);
+                        scoreintent.putExtra(EXTRA_SCORE, prevscore);
+                        getContext().startActivity(scoreintent);
+                    }
                 }
                 if (wonCount > 0) {
                     paint.setColor(HUD_COLOUR);
                     paint.setTextSize(60);
                     canvas.drawText("YOU WON", this.screenX / 2, this.screenY / 2, paint);
                     wonCount--;
+                    if (wonCount <= 0) {
+                        Intent scoreintent = new Intent(getContext(), ScoreActivity.class);
+                        String message = "You Won";
+                        scoreintent.putExtra(EXTRA_MESSAGE, message);
+                        scoreintent.putExtra(EXTRA_SCORE, prevscore);
+                        getContext().startActivity(scoreintent);
+                    }
                 }
             }
             else {

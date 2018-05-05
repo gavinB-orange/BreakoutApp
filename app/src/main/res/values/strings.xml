@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">BreakoutApp</string>
+    <string name="score_title">Scores</string>
+    <string name="play_again">Play Again</string>
 </resources>
